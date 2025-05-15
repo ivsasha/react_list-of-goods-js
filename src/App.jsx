@@ -20,23 +20,31 @@ const REVERSE_ON = 'reverse';
 const REVERSE_OFF = 'reverse_off';
 const SORT_ALPHABETICALLY = 'sortAlphabetically';
 const SORT_BY_LENGTH = 'sortByLength';
-const RESET = 'reset';
 
 const sortAlphabetically = (a, b) => a.localeCompare(b);
 const sortByLength = (a, b) => a.length - b.length;
-const reverse = (a, b) => b.localeCompare(a);
-const reset = (a, b) => a.localeCompare(b);
-const sortFunctions = {
-  [SORT_ALPHABETICALLY]: sortAlphabetically,
-  [SORT_BY_LENGTH]: sortByLength,
-  [REVERSE_ON]: reverse,
-  [RESET]: reset,
-};
 
 export const App = () => {
-  const [goods, setGoods] = useState(goodsFromServer);
   const [sortType, setSortType] = useState('');
-  const [reverseType, setReverseType] = useState('');
+  const [reverseType, setReverseType] = useState(REVERSE_OFF);
+
+  const getProcessedGoods = () => {
+    const sortedGoods = [...goodsFromServer];
+
+    if (sortType === SORT_ALPHABETICALLY) {
+      sortedGoods.sort(sortAlphabetically);
+    } else if (sortType === SORT_BY_LENGTH) {
+      sortedGoods.sort(sortByLength);
+    }
+
+    if (reverseType === REVERSE_ON) {
+      sortedGoods.reverse();
+    }
+
+    return sortedGoods;
+  };
+
+  const goods = getProcessedGoods();
 
   return (
     <div className="section content">
@@ -47,14 +55,6 @@ export const App = () => {
             'is-light': sortType !== SORT_ALPHABETICALLY,
           })}
           onClick={() => {
-            let sortGoods = [...goods].sort(sortFunctions[SORT_ALPHABETICALLY]);
-
-            if (reverseType === REVERSE_ON) {
-              sortGoods = [...sortGoods].reverse();
-            }
-
-            setGoods(sortGoods);
-
             setSortType(SORT_ALPHABETICALLY);
           }}
         >
@@ -67,14 +67,6 @@ export const App = () => {
             'is-light': sortType !== SORT_BY_LENGTH,
           })}
           onClick={() => {
-            let sortGoods = [...goods].sort(sortFunctions[SORT_BY_LENGTH]);
-
-            if (reverseType === REVERSE_ON) {
-              sortGoods = [...sortGoods].reverse();
-            }
-
-            setGoods(sortGoods);
-
             setSortType(SORT_BY_LENGTH);
           }}
         >
@@ -87,25 +79,10 @@ export const App = () => {
             'is-light': reverseType !== REVERSE_ON,
           })}
           onClick={() => {
-            const sortedGoods = [...goods];
-
-            if (!sortType) {
-              sortedGoods.sort(sortFunctions[SORT_ALPHABETICALLY]);
-              setSortType(SORT_ALPHABETICALLY);
-            } else if (sortType === SORT_ALPHABETICALLY) {
-              sortedGoods.sort(sortFunctions[SORT_ALPHABETICALLY]);
-            } else if (sortType === SORT_BY_LENGTH) {
-              sortedGoods.sort(sortFunctions[SORT_BY_LENGTH]);
-            }
-
-            if (reverseType === REVERSE_ON) {
-              setReverseType(REVERSE_OFF);
-            } else {
-              sortedGoods.reverse();
-              setReverseType(REVERSE_ON);
-            }
-
-            setGoods(sortedGoods);
+            // Перемикаємо реверс
+            setReverseType(
+              reverseType === REVERSE_ON ? REVERSE_OFF : REVERSE_ON,
+            );
           }}
         >
           Reverse
@@ -114,13 +91,13 @@ export const App = () => {
         <button
           type="button"
           className={cn('button', 'is-danger', {
-            'is-hidden': sortType === '' && reverseType === '',
-            'is-light': sortType !== '' || reverseType !== '',
+            'is-hidden': sortType === '' && reverseType === REVERSE_OFF,
+            'is-light': sortType !== '' || reverseType !== REVERSE_OFF,
           })}
           onClick={() => {
-            setGoods(goodsFromServer);
+            // Скидаємо всі стани та список
             setSortType('');
-            setReverseType('');
+            setReverseType(REVERSE_OFF);
           }}
         >
           Reset
