@@ -47,7 +47,14 @@ export const App = () => {
             'is-light': sortType !== SORT_ALPHABETICALLY,
           })}
           onClick={() => {
-            setGoods([...goods].sort(sortFunctions[SORT_ALPHABETICALLY]));
+            let sortGoods = [...goods].sort(sortFunctions[SORT_ALPHABETICALLY]);
+
+            if (reverseType === REVERSE_ON) {
+              sortGoods = [...sortGoods].reverse();
+            }
+
+            setGoods(sortGoods);
+
             setSortType(SORT_ALPHABETICALLY);
           }}
         >
@@ -60,7 +67,14 @@ export const App = () => {
             'is-light': sortType !== SORT_BY_LENGTH,
           })}
           onClick={() => {
-            setGoods([...goods].sort(sortFunctions[SORT_BY_LENGTH]));
+            let sortGoods = [...goods].sort(sortFunctions[SORT_BY_LENGTH]);
+
+            if (reverseType === REVERSE_ON) {
+              sortGoods = [...sortGoods].reverse();
+            }
+
+            setGoods(sortGoods);
+
             setSortType(SORT_BY_LENGTH);
           }}
         >
@@ -73,13 +87,25 @@ export const App = () => {
             'is-light': reverseType !== REVERSE_ON,
           })}
           onClick={() => {
+            const sortedGoods = [...goods];
+
+            if (!sortType) {
+              sortedGoods.sort(sortFunctions[SORT_ALPHABETICALLY]);
+              setSortType(SORT_ALPHABETICALLY);
+            } else if (sortType === SORT_ALPHABETICALLY) {
+              sortedGoods.sort(sortFunctions[SORT_ALPHABETICALLY]);
+            } else if (sortType === SORT_BY_LENGTH) {
+              sortedGoods.sort(sortFunctions[SORT_BY_LENGTH]);
+            }
+
             if (reverseType === REVERSE_ON) {
-              setGoods([...goods].reverse());
               setReverseType(REVERSE_OFF);
             } else {
-              setGoods([...goods].reverse());
+              sortedGoods.reverse();
               setReverseType(REVERSE_ON);
             }
+
+            setGoods(sortedGoods);
           }}
         >
           Reverse
@@ -88,8 +114,8 @@ export const App = () => {
         <button
           type="button"
           className={cn('button', 'is-danger', {
-            'is-hidden': sortType === '',
-            'is-light': sortType !== '',
+            'is-hidden': sortType === '' && reverseType === '',
+            'is-light': sortType !== '' || reverseType !== '',
           })}
           onClick={() => {
             setGoods(goodsFromServer);
